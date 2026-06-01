@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+
+# Модели (большие файлы)
+models/*.pt
+models/*.onnx
+
+# Выходные данные
+output/segments/
+output/reports/
+output/faces/
+logs/
+
+# Данные обучения
+datasets/
+runs/
+
+# Временные файлы
+*.tmp
+*.temp
+tmp/
