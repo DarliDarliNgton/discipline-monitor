@@ -99,7 +99,7 @@ class VideoProcessor:
                 else:
                     log.debug("Нарушение завершено без постобработки: id=%d", v.violation_id)
 
-            # Реакция на активные нарушения — начинаем запись
+            # Реакция на активные нарушения — начинаем запись + распознавание
             for v in self.tracker.active_violations:
                 if not self.writer.is_recording:
                     try:
@@ -109,6 +109,13 @@ class VideoProcessor:
                         log.error("Не удалось начать запись сегмента: %s", e)
                     if self.on_violation_start:
                         self.on_violation_start(v)
+                if v.person_name == "Неизвестный" and self.face_rec.is_available:
+                    if self._frame_counter % (self.frame_stride * 5) == 0:
+                        name, sim = self.face_rec.identify(frame)
+                        if sim > 0.0:
+                            with self._lock:
+                                v.person_name = name
+                            log.info("Распознан: '%s' (sim=%.3f) для нарушения id=%d", name, sim, v.violation_id)
 
             # Таймеры для отображения на видео
             active_timers = {
