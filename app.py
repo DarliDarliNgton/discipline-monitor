@@ -5,7 +5,6 @@ streamlit run app.py
 from __future__ import annotations
 import time, tempfile, traceback
 from pathlib import Path
-import requests as _requests
 import cv2, numpy as np, streamlit as st
 from modules.logger import get_logger
 from modules.report_generator import generate_csv_report, generate_text_report
@@ -178,33 +177,14 @@ if page == "Мониторинг":
                                 st.session_state.violations = self._processor.get_all_violations()
                         return av_lib.VideoFrame.from_ndarray(img, format="bgr24")
 
-                def _fetch_ice_servers():
-                    try:
-                        resp = _requests.get(
-                            "https://testingapsformetest.metered.live/api/v1/turn/credentials"
-                            "?apiKey=db07e80881bc888c2e909cb9e4f0c18f166d",
-                            timeout=5,
-                        )
-                        resp.raise_for_status()
-                        return resp.json()
-                    except Exception:
-                        return [
-                            {"urls": "stun:stun.relay.metered.ca:80"},
-                            {"urls": "turn:global.relay.metered.ca:80",
-                             "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
-                            {"urls": "turn:global.relay.metered.ca:80?transport=tcp",
-                             "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
-                            {"urls": "turn:global.relay.metered.ca:443",
-                             "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
-                            {"urls": "turns:global.relay.metered.ca:443?transport=tcp",
-                             "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
-                        ]
-                _ICE_SERVERS = _fetch_ice_servers()
-
                 ctx = webrtc_streamer(
                     key="webcam",
                     video_processor_factory=_CamProcessor,
-                    rtc_configuration={"iceServers": _ICE_SERVERS},
+                    rtc_configuration={"iceServers": [
+                        {"urls": ["stun:stun.l.google.com:19302"]},
+                        {"urls": ["stun:stun1.l.google.com:19302"]},
+                        {"urls": ["stun:stun.relay.metered.ca:80"]},
+                    ]},
                     media_stream_constraints={"video": True, "audio": False},
                 )
                 if ctx.video_processor and st.session_state.violations:
