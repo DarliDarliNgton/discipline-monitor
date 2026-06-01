@@ -154,21 +154,42 @@ if page == "Мониторинг":
         # === Веб-камера ===
         if source == "Веб-камера":
             st.markdown("#### 📷 Веб-камера")
-            btn1, btn2 = st.columns(2)
-            start_cam = btn1.button("▶  ЗАПУСТИТЬ КАМЕРУ", use_container_width=True, key="btn_cam_start")
-            stop_cam = btn2.button("⏹  ОСТАНОВИТЬ", use_container_width=True, key="btn_cam_stop")
-            if stop_cam: st.session_state.running = False
-            frame_ph = st.empty()
-            if start_cam:
-                p = _get_processor()
-                if p:
-                    p.reset(); st.session_state.running = True; st.session_state.session_start = time.time()
-                    cap = cv2.VideoCapture(0)
-                    if cap.isOpened():
-                        _run_video(cap, p, frame_ph, journal_ph)
-                    else:
-                        st.error("❌ Камера недоступна")
-                        st.session_state.running = False
+            try:
+                from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
+                import av as av_lib
+                import threading
+
+                class _CamProcessor(VideoProcessorBase):
+                    def __init__(self):
+                        self._processor = None
+                        self._lock = threading.Lock()
+
+                    def recv(self, frame):
+                        img = frame.to_ndarray(format="bgr24")
+                        if self._processor is None:
+                            self._processor = _get_processor()
+                            if self._processor:
+                                self._processor.reset()
+                                st.session_state.session_start = time.time()
+                        if self._processor:
+                            with self._lock:
+                                img = self._processor.process_frame(img)
+                                st.session_state.violations = self._processor.get_all_violations()
+                        return av_lib.VideoFrame.from_ndarray(img, format="bgr24")
+
+                ctx = webrtc_streamer(
+                    key="webcam",
+                    video_processor_factory=_CamProcessor,
+                    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+                    media_stream_constraints={"video": True, "audio": False},
+                )
+                if ctx.video_processor and st.session_state.violations:
+                    _update_journal(journal_ph)
+
+            except ImportError:
+                st.error("streamlit-webrtc не установлен: `pip install streamlit-webrtc`")
+            except Exception as e:
+                _log_error(f"Ошибка веб-камеры: {e}")
 
         # === Видеофайл ===
         elif source == "Видеофайл":
