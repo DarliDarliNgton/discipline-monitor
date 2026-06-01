@@ -56,8 +56,13 @@ class ViolationDetector:
         try:
             from ultralytics import YOLO
             if not self.model_path.exists():
-                raise FileNotFoundError(f"Файл модели не найден: {self.model_path}")
-            self._model = YOLO(str(self.model_path))
+                log.warning("Модель %s не найдена, скачиваю yolo11s.pt", self.model_path)
+                self._model = YOLO("yolo11s.pt")
+                self.model_path.parent.mkdir(parents=True, exist_ok=True)
+                import shutil
+                shutil.copy("yolo11s.pt", self.model_path)
+            else:
+                self._model = YOLO(str(self.model_path))
             log.info("Модель успешно загружена: %s", self.model_path)
         except FileNotFoundError as e:
             log.error("Модель не найдена: %s", e)
