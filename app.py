@@ -178,18 +178,17 @@ if page == "Мониторинг":
                         return av_lib.VideoFrame.from_ndarray(img, format="bgr24")
 
                 _ICE_SERVERS = [
-                    {"urls": ["stun:stun.l.google.com:19302"]},
-                    {
-                        "urls": [
-                            "turn:global.relay.metered.ca:80",
-                            "turn:global.relay.metered.ca:80?transport=tcp",
-                            "turn:global.relay.metered.ca:443",
-                            "turn:global.relay.metered.ca:443?transport=tcp",
-                            "turns:global.relay.metered.ca:443",
-                        ],
-                        "username": "8397206a6f7d696e6fac1bdc",
-                        "credential": "8efZ+igpvLmYNWr2",
-                    },
+                    {"urls": "stun:stun.relay.metered.ca:80"},
+                    {"urls": "turn:a.relay.metered.ca:80",
+                     "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
+                    {"urls": "turn:a.relay.metered.ca:80?transport=tcp",
+                     "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
+                    {"urls": "turn:a.relay.metered.ca:443",
+                     "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
+                    {"urls": "turn:a.relay.metered.ca:443?transport=tcp",
+                     "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
+                    {"urls": "turns:a.relay.metered.ca:443?transport=tcp",
+                     "username": "8397206a6f7d696e6fac1bdc", "credential": "8efZ+igpvLmYNWr2"},
                 ]
 
                 ctx = webrtc_streamer(
