@@ -177,32 +177,25 @@ if page == "Мониторинг":
                                 st.session_state.violations = self._processor.get_all_violations()
                         return av_lib.VideoFrame.from_ndarray(img, format="bgr24")
 
-                def _get_ice_servers():
-                    try:
-                        turn_user = st.secrets["turn_username"]
-                        turn_cred = st.secrets["turn_credential"]
-                    except (KeyError, FileNotFoundError):
-                        turn_user = "openrelayproject"
-                        turn_cred = "openrelayproject"
-                    return [
-                        {"urls": ["stun:stun.l.google.com:19302"]},
-                        {
-                            "urls": [
-                                "turn:global.relay.metered.ca:80",
-                                "turn:global.relay.metered.ca:80?transport=tcp",
-                                "turn:global.relay.metered.ca:443",
-                                "turn:global.relay.metered.ca:443?transport=tcp",
-                                "turns:global.relay.metered.ca:443",
-                            ],
-                            "username": turn_user,
-                            "credential": turn_cred,
-                        },
-                    ]
+                _ICE_SERVERS = [
+                    {"urls": ["stun:stun.l.google.com:19302"]},
+                    {
+                        "urls": [
+                            "turn:global.relay.metered.ca:80",
+                            "turn:global.relay.metered.ca:80?transport=tcp",
+                            "turn:global.relay.metered.ca:443",
+                            "turn:global.relay.metered.ca:443?transport=tcp",
+                            "turns:global.relay.metered.ca:443",
+                        ],
+                        "username": "8397206a6f7d696e6fac1bdc",
+                        "credential": "8efZ+igpvLmYNWr2",
+                    },
+                ]
 
                 ctx = webrtc_streamer(
                     key="webcam",
                     video_processor_factory=_CamProcessor,
-                    rtc_configuration={"iceServers": _get_ice_servers()},
+                    rtc_configuration={"iceServers": _ICE_SERVERS},
                     media_stream_constraints={"video": True, "audio": False},
                 )
                 if ctx.video_processor and st.session_state.violations:
